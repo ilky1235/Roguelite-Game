@@ -40,7 +40,12 @@ void Entity::update()
 
 }
 
-void Player::handle_input(double dt)
+point_2d Entity::get_coordinates() const
+{
+    return coordinates;
+}
+
+void Player::handle_input(double dt) 
 {
     dash();
     if (key_down(D_KEY)) {
@@ -90,6 +95,22 @@ void Player::handle_input(double dt)
     if (dash_cooldown > 0) {
         dash_cooldown -= dt;
     }
+
+    if (swing_timer > 0) {
+        swing_timer -= dt;
+    }
+
+    else {
+        is_swinging = false;
+    }
+
+    if (sword_cooldown > 0) {
+        sword_cooldown -= dt;
+    }
+
+
+
+
 }
 
 void Player::dash()
@@ -100,6 +121,46 @@ void Player::dash()
         start_timer(dash_timer);
     }
 }
+
+void Player::attack(point_2d target)
+{
+    if (sword_cooldown <= 0) {
+        is_swinging = true;
+        swing_timer = 0.15; // Swing lasts for 0.15 seconds
+        sword_cooldown = 0.4;
+
+        point_2d center = {coordinates.x + 20, coordinates.y + 20};
+
+        vector_2d raw_vector = vector_point_to_point(center, target);
+        if (vector_magnitude(raw_vector) > 0) {
+            swing_dir = unit_vector(raw_vector);
+        } else {
+            swing_dir.x = 1;
+            swing_dir.y = 0;
+        }
+    }
+}
+
+void Player::draw_hitbox()
+{
+    if (is_swinging) {
+        point_2d center = {coordinates.x + 20, coordinates.y + 20};
+        hitbox = {center.x + (swing_dir.x * 40), center.y + (swing_dir.y * 40)};
+
+        fill_circle(rgba_color(100, 100, 100, 150), hitbox.x, hitbox.y, 45);
+    }
+}
+
+bool Player::get_is_swinging() const
+{
+    return is_swinging;
+}
+
+point_2d Player::get_attack_hitbox() const
+{
+    return hitbox;
+}
+
 void Enemy::draw()
 {
     fill_circle(COLOR_RED, coordinates, 5);
@@ -107,8 +168,8 @@ void Enemy::draw()
 
 void Enemy::update(const Player &target, double dt, dynamic_array <Projectile> &projectiles)
 {
-    double target_center_x = target.coordinates.x + 20;
-    double target_center_y = target.coordinates.y + 20;
+    double target_center_x = target.get_coordinates().x + 20;
+    double target_center_y = target.get_coordinates().y + 20;
     double dx = target_center_x - coordinates.x;
     double dy = target_center_y - coordinates.y;
 
@@ -119,8 +180,8 @@ void Enemy::update(const Player &target, double dt, dynamic_array <Projectile> &
         coordinates.y += (dy / magnitude ) * movement_speed * dt;
     }
 
-    if (!reload_timer) {
-        Projectile new_projectile(coordinates, target.coordinates);
+    if (reload_timer <= 0) {
+        Projectile new_projectile(coordinates, target.get_coordinates());
         projectiles.add(new_projectile);
         reload_timer = 1;
     }
