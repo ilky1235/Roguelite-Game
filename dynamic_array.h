@@ -155,6 +155,15 @@ public:
         }
     }
 
+    void clear()
+    {
+        for (int i = 0; i < size; i++) {
+            data[i].~T();
+        }
+
+        size = 0;
+    }
+
     T &operator[](int index)
     {
         return get(index);

@@ -1,2 +1,12 @@
-game: main.cpp entity.cpp GameController.cpp
-	clang++ main.cpp entity.cpp GameController.cpp -l splashkit -Wall -Wextra -o game
+CXX = clang++
+CXXFLAGS = -Wall -Wextra 
+LIBS = -l splashkit
+
+SRCS = main.cpp entity.cpp player.cpp enemy.cpp projectile.cpp GameController.cpp
+TARGET = game
+
+$(TARGET): $(SRCS)
+	$(CXX) $(SRCS) $(CXXFLAGS) $(LIBS) -o $(TARGET)
+
+clean:
+	rm -f $(TARGET)

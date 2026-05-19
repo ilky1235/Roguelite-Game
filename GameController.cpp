@@ -4,7 +4,7 @@
 GameController::GameController()
 {
     for (int i = 0; i < 3; i++) {
-        enemy_arr.add(Enemy(100, (i * 200)));
+        enemy_arr.add(Enemy(120, (i * 200) + 20, i));
     }
 }
 
@@ -14,17 +14,32 @@ void GameController::run(double dt)
         player.attack(mouse_position());
     }
     player.handle_input(dt);
-    for (int i = enemy_arr.length() - 1; i >= 0; i--) {
-        if (player.get_is_swinging()) {
-            point_2d sword_center = player.get_attack_hitbox();
-            if (point_point_distance(enemy_arr[i].get_coordinates(), sword_center) <= 65) {
-                enemy_arr.remove(i);
-                continue;
+
+    if (player.get_is_swinging()) {
+        point_2d sword_center = player.get_attack_hitbox();
+
+        for (int i = enemy_arr.length() - 1; i >= 0; --i) {
+             if (point_point_distance(enemy_arr[i].get_coordinates(), sword_center) <= 65) {
+                if (!player.has_hit(enemy_arr[i].get_id())) {
+                    enemy_arr[i].take_damage(25);
+                    player.add_to_hitlist(enemy_arr[i].get_id());
+
+                }
+
+                if (enemy_arr[i].get_health() <= 0) {
+                    enemy_arr.remove(i);
+                    continue;
+                 }
+             }
             }
-        }
+    }
+
+    for (int i = enemy_arr.length() - 1; i >= 0; i--) {
         enemy_arr[i].update(player, dt, projectiles);
         enemy_arr[i].draw();
     }
+        
+        
 
 
     for (int i = projectiles.length() - 1 ; i >= 0; i--) {

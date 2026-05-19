@@ -1,7 +1,9 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
-#include "entity.h"
+#include "player.h"
 #include "dynamic_array.h"
+#include "enemy.h"
+#include "projectile.h"
 
 class GameController {
     public:
