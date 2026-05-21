@@ -5,8 +5,9 @@
 
 int main()
 {
-    GameController game;
     open_window("Game", 1280, 720);
+    GameController game;
+ 
 
     timer dt_timer = create_timer("Movement Timer");
     start_timer(dt_timer);

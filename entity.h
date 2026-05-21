@@ -13,18 +13,12 @@ class Entity {
 
     public:
         Entity(double x, double y, double health, double speed);
-        void draw();
         void update();
         void take_damage(double amount);
         point_2d get_coordinates() const;
         double get_health() const;
         
 };
-
-
-
-
-
 
 
 

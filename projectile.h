@@ -5,8 +5,7 @@
 
 class Projectile : public Entity {
     protected:
-        double vel_x{};
-        double vel_y{};
+        vector_2d velocity{};
     public:
         Projectile(point_2d start, point_2d target);
 

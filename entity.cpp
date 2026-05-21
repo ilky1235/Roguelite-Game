@@ -1,5 +1,4 @@
 #include "entity.h"
-#include <cmath>
 #include "dynamic_array.h"
 
 
@@ -14,11 +13,6 @@ Entity::Entity(double x, double y, double health, double speed)
 
 
 
-
-void Entity::draw()
-{
-    fill_circle(COLOR_BLACK, coordinates.x, coordinates.y, 20);
-}
 
 void Entity::take_damage(double amount)
 {

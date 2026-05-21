@@ -11,19 +11,24 @@ class Player : public Entity {
         vector_2d swing_dir;
         double swing_timer;
         double sword_cooldown;
+        double i_frame_timer{};
         point_2d hitbox{};
         dynamic_array<int> hit_list;
 
     public:
         Player(double x, double y);
-        void handle_input(double dt);
+        void handle_input(double dt, dynamic_array<rectangle> rectangles);
         void dash();
+        void draw();
         void attack(point_2d target);
         void draw_hitbox();
         point_2d get_attack_hitbox() const;
         bool get_is_swinging() const;
         bool has_hit(int enemy_id);
         void add_to_hitlist(int enemy_id);
+        bool is_dead() const;
+        bool is_invincible() const;
+        void take_damage(double amount);
 };
 
 
