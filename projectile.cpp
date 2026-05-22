@@ -28,3 +28,15 @@ void Projectile::draw()
     fill_rectangle(COLOR_ORANGE, coordinates.x, coordinates.y, 10, 10);
 }
 
+bool Projectile::get_is_deflected() const
+{
+    return is_deflected;
+}
+
+void Projectile::deflect()
+{
+    is_deflected = true;
+    velocity.x *= -1.5;
+    velocity.y *= -1.5;
+}
+

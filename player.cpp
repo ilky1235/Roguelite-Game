@@ -5,14 +5,29 @@ Player::Player(double x, double y)
 {
     dash_cooldown = 0;
     is_dashing = false;
-    dash_timer = create_timer("Dash Timer");
+    is_parrying = false;
+    parry_timer = 0.15;
+    parry_cooldown = 0.6;
 }
 
-void Player::handle_input(double dt, dynamic_array<rectangle> rectangles) 
+void Player::handle_input(double dt) 
 {
     dash();
 
     vector_2d input_dir{};
+
+    if (mouse_clicked(RIGHT_BUTTON)) {
+        attempt_parry();
+    }
+
+    if (parry_timer > 0) {
+        parry_timer -= dt;
+        if (parry_timer <= 0) is_parrying = false;
+    }
+
+    if (parry_cooldown > 0) {
+        parry_cooldown -= dt;
+    }
     
     if (key_down(D_KEY)) {
         input_dir.x++;
@@ -33,34 +48,24 @@ void Player::handle_input(double dt, dynamic_array<rectangle> rectangles)
     if (vector_magnitude(input_dir) > 0) {
         input_dir = unit_vector(input_dir);
     }
+    current_velocity.x = input_dir.x * movement_speed;
+    current_velocity.y = input_dir.y * movement_speed;
 
     double dx = input_dir.x * movement_speed * dt;
     double dy = input_dir.y * movement_speed * dt;
 
-    // Axis Split
-    double old_x = coordinates.x;
+    if (knockback_timer > 0) {
+        knockback_timer -= dt;
+
+        dx += knockback_vec.x * dt;
+        dy += knockback_vec.y * dt;
+
+        knockback_vec.x -= knockback_vec.x * 7 /*friction*/ * dt;
+        knockback_vec.y -= knockback_vec.y * 7 * dt;
+    }
+
     coordinates.x += dx;
-
-    rectangle player_box = rectangle_from(coordinates.x-20, coordinates.y-20, 40, 40);
-
-    for (int i = 0; i < rectangles.length(); i++) {
-        if (rectangles_intersect(player_box, rectangles[i])) {
-            coordinates.x= old_x;
-            break;
-        }
-    }
-
-    double old_y = coordinates.y;
     coordinates.y += dy;
-
-    player_box = rectangle_from(coordinates.x-20, coordinates.y-20, 40, 40);
-
-    for (int i = 0; i < rectangles.length(); ++i) {
-        if (rectangles_intersect(player_box, rectangles[i])) {
-            coordinates.y = old_y;
-            break;
-        }
-    }
 
     if (coordinates.x < 0) {
         coordinates.x = 0;
@@ -80,12 +85,11 @@ void Player::handle_input(double dt, dynamic_array<rectangle> rectangles)
 
     if (is_dashing) {
 
-        if (timer_ticks(dash_timer) >= 150) {
+        dash_active_timer -= dt;
+        if (dash_active_timer <= 0) {
             movement_speed /= 4;
             is_dashing = false;
-            dash_cooldown = 1;
-            reset_timer(dash_timer);
-
+            dash_cooldown = 0.5;
         }
     }
 
@@ -115,7 +119,7 @@ void Player::dash()
     if (key_typed(SPACE_KEY) && dash_cooldown <= 0) {
         movement_speed *= 4;
         is_dashing = true;
-        start_timer(dash_timer);
+        dash_active_timer = 0.15;
         i_frame_timer = 0.1;
     }
 }
@@ -180,8 +184,22 @@ bool Player::is_dead() const
     return health <= 0;
 }
 
+void Player::attempt_parry() {
+    // You can only parry if you aren't already swinging, parrying, or recovering!
+    if (parry_cooldown <= 0 && !get_is_swinging()) {
+        is_parrying = true;
+        parry_timer = 0.15;   // The strict 150ms God-Mode window
+        parry_cooldown = 0.6; // The half-second punishment if you miss
+    }
+}
+
 void Player::draw() 
 {
+    if (is_parrying) {
+        draw_circle(COLOR_WHITE, coordinates.x, coordinates.y, 45);
+        draw_circle(COLOR_CYAN, coordinates.x, coordinates.y, 40);
+    }
+
     if (is_invincible()) {
         fill_circle(rgba_color(0, 0, 0, 100), coordinates, 20);
 
@@ -211,4 +229,61 @@ void Player::take_damage(double amount)
         i_frame_timer = 0.5;
     }
 }
+
+
+void Player::apply_knockback(vector_2d force, double time)
+{
+    knockback_vec = force;
+    knockback_timer = time;
+}
+
+void Player::set_coordinates(double new_x, double new_y)
+{
+    coordinates.x = new_x;
+    coordinates.y = new_y;
+}
+
+void Player::increase_damage(double amount)
+{
+    sword_damage += amount;
+}
+
+void Player::increase_speed(double amount)
+{
+    movement_speed += amount;
+}
+
+void Player::heal(double amount)
+{
+    health += amount;
+    if (health > max_health) {
+        health = max_health;
+    }
+}
+
+double Player::get_sword_damage()
+{
+    return sword_damage;
+}
+
+void Player::reset_stats() {
+    coordinates.x = 640;
+    coordinates.y = 360;
+    health = max_health;
+    sword_damage = 25; // Or whatever your base damage is
+    movement_speed = 400;
+    hit_list.clear();
+}
+
+vector_2d Player::get_curr_velocity() const 
+{
+    return current_velocity;
+}
+
+bool Player::get_is_parrying() const
+{
+    return is_parrying;
+}
+
+
 

@@ -6,7 +6,7 @@ class Player : public Entity {
     protected: 
         double dash_cooldown;
         bool is_dashing;
-        timer dash_timer;
+        double dash_active_timer;
         bool is_swinging;
         vector_2d swing_dir;
         double swing_timer;
@@ -14,10 +14,17 @@ class Player : public Entity {
         double i_frame_timer{};
         point_2d hitbox{};
         dynamic_array<int> hit_list;
+        vector_2d knockback_vec{};
+        double knockback_timer;
+        double sword_damage{25.0};
+        vector_2d current_velocity{};
+        bool is_parrying;
+        double parry_timer;
+        double parry_cooldown;
 
     public:
         Player(double x, double y);
-        void handle_input(double dt, dynamic_array<rectangle> rectangles);
+        void handle_input(double dt);
         void dash();
         void draw();
         void attack(point_2d target);
@@ -29,6 +36,16 @@ class Player : public Entity {
         bool is_dead() const;
         bool is_invincible() const;
         void take_damage(double amount);
+        void apply_knockback(vector_2d force, double time);
+        void set_coordinates(double new_x, double new_y);
+        void increase_damage(double amount);
+        void increase_speed(double amount);
+        void heal(double amount);
+        double get_sword_damage();
+        void reset_stats();
+        vector_2d get_curr_velocity() const;
+        void attempt_parry();
+        bool get_is_parrying() const;
 };
 
 
