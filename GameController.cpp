@@ -5,11 +5,13 @@ GameController::GameController()
     state = HUB; // Boot directly into the safe zone
     load_font("TitleFont", "OptimusPrinceps.ttf");
     load_font("TextFont", "CaesarDressing-Regular.ttf");
+    load_bitmap("Grass", "grass.png");
+
 }
 
 GameController::~GameController()
 {
-    // Only clean up the enemies. 
+    // Only clean up the enemies
     // The LevelManager now handles deleting the graph nodes!
     for (int i = 0; i< enemy_arr.length(); i++) {
         delete enemy_arr[i];
@@ -34,6 +36,14 @@ void GameController::run(double dt)
 
 void GameController::update_hub(double dt)
 {
+
+    // Draw the floor
+    for (int x = -32 ; x < screen_width() + 32; x += 32) {
+        for (int y = -32; y < screen_height() + 32; y +=32) {
+            draw_bitmap(bitmap_named("Grass"), x, y);
+        }
+    }
+
     if (mouse_clicked(LEFT_BUTTON)) {
         player.attack(mouse_position());
     }
@@ -48,7 +58,9 @@ void GameController::update_hub(double dt)
     draw_text("ENTER", COLOR_WHITE, "TitleFont", 20, tartarus_door.x + 25, tartarus_door.y + 30);
 
     player.draw();
-    player.draw_hitbox();
+    if (show_debug) {
+        player.draw_hitbox();
+    }
 
     rectangle player_hitbox = rectangle_from(player.get_coordinates().x - 20, player.get_coordinates().y - 20, 40, 40);
     
@@ -99,12 +111,16 @@ void GameController::update_playing(double dt)
         player.increase_damage(5000);
     }
 
+    if (key_typed(P_KEY)) {
+        show_debug = !show_debug;
+    }
+
     // --- SWORD LOGIC ---
-    if (player.get_is_swinging()) {
+    if (player.is_hitbox_active()) {
         point_2d sword_center = player.get_attack_hitbox();
 
         for (int i = enemy_arr.length() - 1; i >= 0; --i) {
-             if (point_point_distance(enemy_arr[i]->get_coordinates(), sword_center) <= 65) {
+             if (point_point_distance(enemy_arr[i]->get_coordinates(), sword_center) <= 45) {
                 if (!player.has_hit(enemy_arr[i]->get_id())) {
                     enemy_arr[i]->take_damage(player.get_sword_damage());
                     player.add_to_hitlist(enemy_arr[i]->get_id());
@@ -134,11 +150,20 @@ void GameController::update_playing(double dt)
         point_2d pos = projectiles[i].get_coordinates();
 
 
-        if (!projectiles[i].get_is_deflected() && point_point_distance(pos, player.get_coordinates()) <= 50) {
+        if (!projectiles[i].get_is_deflected() && point_point_distance(pos, player.get_coordinates()) <= 20) {
 
             if (player.get_is_parrying()) {
                 hit_pause_timer = 0.1;
                 screen_shake_timer = 0.15;
+
+                vector_2d arrow_kb = vector_point_to_point(pos, player.get_coordinates());
+                if (vector_magnitude(arrow_kb) > 0) {
+                    arrow_kb = unit_vector(arrow_kb);
+                    arrow_kb.x *= 400;
+                    arrow_kb.y *= 400;
+
+                    player.apply_knockback(arrow_kb, 0.25);
+                }
 
                 projectiles[i].deflect();
                 continue;
@@ -146,6 +171,7 @@ void GameController::update_playing(double dt)
 
             else if (!player.is_invincible()) {
                 player.take_damage(20);
+                screen_shake_timer = 0.1;
             }
             projectiles.remove(i);
             continue;
@@ -166,7 +192,7 @@ void GameController::update_playing(double dt)
             if (enemy_arr[i]->has_exploded()) {
                 DangerZone dz;
                 dz.position = enemy_arr[i]->get_coordinates();
-                dz.radius = 150;
+                dz.radius = 100;
                 dz.timer = 0;
                 danger_zones.add(dz);
             }
@@ -210,7 +236,7 @@ void GameController::update_playing(double dt)
         // MELEE COLLISION
         if (enemy_arr[i]->is_stunned()) continue;
 
-        if (point_point_distance(enemy_arr[i]->get_coordinates(), player.get_coordinates()) <= 35) {
+        if (point_point_distance(enemy_arr[i]->get_coordinates(), player.get_coordinates()) <= 30) {
 
             // Sekiro Parry
             if (player.get_is_parrying()) {
@@ -230,7 +256,7 @@ void GameController::update_playing(double dt)
             else if (!player.is_invincible()) {
                 player.take_damage(20);
                 screen_shake_timer = 0.2; 
-                hit_pause_timer = 0.05;   
+                hit_pause_timer = 0.15;   
 
                 vector_2d knockback = vector_point_to_point(enemy_arr[i]->get_coordinates(), player.get_coordinates());
 
@@ -279,7 +305,15 @@ void GameController::update_playing(double dt)
     }
 
     player.draw();
-    player.draw_hitbox();
+
+    if (show_debug) {
+        player.draw_hitbox();
+        draw_circle(COLOR_RED, player.get_coordinates().x, player.get_coordinates().y, 30); 
+    
+    // This is the 50px radius where projectiles can hurt you
+    draw_circle(COLOR_BLUE, player.get_coordinates().x , player.get_coordinates().y, 20);
+    }
+
 
     // ==========================================
     // --- THE LEVEL MANAGER INTEGRATION ---
@@ -410,7 +444,7 @@ string GameController::reward_to_string(reward_type r) {
 void GameController::apply_reward(reward_type reward)
 {
     if (reward == HEAL) {
-        player.heal(50);
+        player.heal(100);
     }
     else if (reward == SPEED) {
         player.increase_speed(50);

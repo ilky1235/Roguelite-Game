@@ -47,6 +47,7 @@ class GameController {
         
         // --- NEW ARCHITECTURE ---
         LevelManager level_manager; 
+        bool show_debug = false;
 
     public:
         GameController();

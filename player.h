@@ -2,25 +2,37 @@
 #define PLAYER_H
 #include "entity.h"
 
+enum WeaponType {
+    SWORD,
+    BOW
+};
+
 class Player : public Entity {
     protected: 
-        double dash_cooldown;
-        bool is_dashing;
-        double dash_active_timer;
-        bool is_swinging;
-        vector_2d swing_dir;
-        double swing_timer;
-        double sword_cooldown;
+        double dash_cooldown{};
+        bool is_dashing{};
+        double dash_active_timer{};
+        bool is_swinging{};
+        vector_2d swing_dir{};
+        double swing_timer{};
+        double sword_cooldown{};
         double i_frame_timer{};
         point_2d hitbox{};
-        dynamic_array<int> hit_list;
+        dynamic_array<int> hit_list{};
         vector_2d knockback_vec{};
-        double knockback_timer;
+        double knockback_timer{};
         double sword_damage{25.0};
         vector_2d current_velocity{};
-        bool is_parrying;
-        double parry_timer;
-        double parry_cooldown;
+        bool is_parrying{};
+        double parry_timer{};
+        double parry_cooldown{};
+        animation player_animation{};
+        animation_script player_anim_script{};
+        bool is_facing_left{};
+        string current_animation{};
+        WeaponType weapon = SWORD;
+        bool arrow_ready{};
+        point_2d arrow_target{};
 
     public:
         Player(double x, double y);
@@ -46,6 +58,11 @@ class Player : public Entity {
         vector_2d get_curr_velocity() const;
         void attempt_parry();
         bool get_is_parrying() const;
+        bool is_hitbox_active() const;
+        void equip_weapon(WeaponType w);
+        WeaponType get_weapon() const;
+        bool pull_trigger();
+        point_2d get_arrow_target() const;
 };
 
 

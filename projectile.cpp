@@ -3,7 +3,6 @@
 Projectile::Projectile(point_2d start, point_2d target)
     : Entity(start.x, start.y, 1, 700)
 {
-    // NO MORE + 20 AND NO MORE MANUAL MATH!
     vector_2d raw_dir = vector_point_to_point(coordinates, target);
 
     if (vector_magnitude(raw_dir) > 0) {

@@ -297,6 +297,7 @@ void BossEnemy::apply_knockback(vector_2d force, double duration)
     (void) force;
     (void) duration;
 
+    stun_timer = duration;
     flash_timer = 0.1;
 }
 
@@ -313,19 +314,19 @@ void Enemy::apply_knockback(vector_2d force, double duration)
 }
 
 KamikazeEnemy::KamikazeEnemy(double x, double y, int assigned_id)
-    : Enemy(x, y, assigned_id, 40, 500) {}
+    : Enemy(x, y, assigned_id, 40, 300) {}
 
 void KamikazeEnemy::draw()
 {
     if (is_triggered) {
         double ratio= 1.0 - (fuse_timer / 1.5);
-        draw_circle(rgba_color(255, 0, 0, 150), coordinates.x, coordinates.y, 150);
+        draw_circle(rgba_color(255, 0, 0, 150), coordinates.x, coordinates.y, 100);
 
-        double current_radius = 150 * ratio;
+        double current_radius = 100 * ratio;
         fill_circle(rgba_color(255, 0, 0, 60), coordinates.x, coordinates.y, current_radius);
-        
+
         double flash_rate = 0.05 + (fuse_timer * 0.1);
-        draw_circle(rgba_color(255, 0, 0, 80), coordinates.x, coordinates.y, 150);
+        draw_circle(rgba_color(255, 0, 0, 80), coordinates.x, coordinates.y, 100);
         if (std::fmod(fuse_timer , flash_rate * 2) > flash_rate) {
             fill_circle(COLOR_WHITE, coordinates, 15);
            
@@ -342,7 +343,6 @@ void KamikazeEnemy::draw()
         else {
             fill_circle(COLOR_CYAN, coordinates, 15);
         }
-        draw_circle(rgba_color(255, 0, 0, 150), coordinates.x, coordinates.y, 90);
     }
 
     
@@ -355,9 +355,9 @@ void KamikazeEnemy::update(const Player &target, double dt, dynamic_array<Projec
     // If we haven't triggered yet, check the distance!
     if (!is_triggered) {
         double dist = point_point_distance(coordinates, target.get_coordinates());
-        if (dist <= 90) {
+        if (dist <= 60) {
             is_triggered = true;   // ARM THE BOMB!
-            movement_speed = 650;
+            movement_speed = 520;
             fuse_timer = 1.5;  // Optional: Make it sprint faster when enraged!
         }
     }

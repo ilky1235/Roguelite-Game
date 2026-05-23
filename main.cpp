@@ -6,6 +6,9 @@
 int main()
 {
     open_window("Game", 1280, 720);
+    load_bitmap("Player", "combined_sheet.png");
+    bitmap_set_cell_details(bitmap_named("Player"), 125, 125, 24, 1, 24);
+    load_animation_script("PlayerAnim", "player_anim.txt");
     GameController game;
  
 
