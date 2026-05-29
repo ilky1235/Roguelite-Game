@@ -1,0 +1,8 @@
+SplashKit Animation
+
+// --- RUNNING (Plays frames 0-7, loops back to 0) ---
+// Format: f:[frame_id_start - frame_id_end], [cell_start - cell_end], duration, next_frame
+f:[0-7],[0-7],40,0
+
+// --- IDENTIFIERS ---
+i:Run,0

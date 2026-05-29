@@ -1,0 +1,12 @@
+SplashKit Animation
+
+// -- Frames --
+// Idle (cells 0-10)
+f: [0-10], [0-10], 30, 0
+
+// Run (cells 11-22)
+f: [11-22], [11-22], 15, 11
+
+// -- Animation Identifiers --
+i:Idle,0
+i:Run,11

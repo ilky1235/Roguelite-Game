@@ -1,0 +1,33 @@
+SplashKit Animation
+// --- AIR ATTACK WINDUP (Plays 0 and 1, goes to 2) ---
+f:[0-1],[0-1],12,2
+
+// --- THE FREEZE (Loops frame 2 infinitely) ---
+f:2,2,12,2
+
+// --- AIR ATTACK SLAM (Plays 3, 4, 5, goes to 15) ---
+f:[3-5],[3-5],15,15
+
+// --- CROUCH ATTACK (Plays 6-11, goes to 15) ---
+f:[6-11],[6-11],20,15
+
+// --- HURT (Plays 12-14, goes to 15) ---
+f:[12-14],[12-14],20,15
+
+// --- IDLE (Plays 15-18, loops back to 15) ---
+f:[15-18],[15-18],15,15
+
+// --- RUNNING (Plays 19-30, loops back to 19) ---
+f:[19-30],[19-30],40,19
+
+// --- NORMAL ATTACK (Plays 31-36, goes to 15) ---
+f:[31-36],[31-36],20,15
+
+// --- IDENTIFIERS ---
+i:JumpWindup,0
+i:JumpSlam,3
+i:CrouchAttack,6
+i:Hurt,12
+i:Idle,15
+i:Run,19
+i:NormalAttack,31

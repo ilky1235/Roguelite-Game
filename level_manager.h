@@ -19,7 +19,7 @@ class LevelManager {
         dynamic_array<RoomNode*> all_nodes;
         dynamic_array<PhysicalDoor> active_doors;
 
-        reward_type get_random_reward();
+        
 
     public:
         LevelManager();
@@ -36,6 +36,7 @@ class LevelManager {
         
         void generate_doors(int screen_w, int screen_h);
         dynamic_array<PhysicalDoor>& get_active_doors();
+        reward_type get_random_reward();
         void clear_doors();
 };
 

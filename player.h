@@ -7,6 +7,27 @@ enum WeaponType {
     BOW
 };
 
+enum FloorType {
+    FLOOR_GRASS,
+    FLOOR_STONE
+};
+
+enum BoonID {
+    BOON_ARES_STRIKE,
+    BOON_ARES_SWIFTNESS,
+
+    BOON_ZEUS_STRIKE,
+    BOON_ZEUS_SWIFTNESS,
+    BOON_ZEUS_DASH
+};
+
+struct Boon {
+    BoonID id;
+    string name;
+    string description;
+    color theme;
+};
+
 class Player : public Entity {
     protected: 
         double dash_cooldown{};
@@ -33,6 +54,14 @@ class Player : public Entity {
         WeaponType weapon = SWORD;
         bool arrow_ready{};
         point_2d arrow_target{};
+        dynamic_array<Boon> active_boons{};
+        double step_timer;
+        FloorType current_floor;
+        bool parry_landed = false;
+        int melee_combo_step{};
+        double combo_window_timer{};
+        double combo_damage_mult{1.0};
+        bool just_dashed{};
 
     public:
         Player(double x, double y);
@@ -63,6 +92,18 @@ class Player : public Entity {
         WeaponType get_weapon() const;
         bool pull_trigger();
         point_2d get_arrow_target() const;
+        void draw_hud();
+        void add_boon(Boon b);
+        bool has_boon(BoonID target_id);
+        void set_floor_type(FloorType f);
+        bool pull_trigger(point_2d &target_out);
+        bool get_parry_landed() const {return parry_landed;}
+        void set_parry_landed(bool val) {parry_landed = val;}
+        void grant_iframes(double duration);
+        void reset_parry_cooldown();
+        void extend_parry();
+        double get_combo_mult() const;
+        bool get_and_clear_dash_event();
 };
 
 

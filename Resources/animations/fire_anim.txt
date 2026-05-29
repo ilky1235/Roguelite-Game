@@ -1,0 +1,5 @@
+SplashKit Animation
+// Plays frames 0 through 7, 10 ticks per frame, loops back to 0
+f:[0-7], [0-7], 10, 0
+
+i:Burn, 0

@@ -6,8 +6,8 @@
 
 enum reward_type {
     HEAL, 
-    DAMAGE,
-    SPEED,
+    ARES,
+    ZEUS,
     BOSS
 };
 

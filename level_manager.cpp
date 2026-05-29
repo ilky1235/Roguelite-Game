@@ -14,8 +14,8 @@ LevelManager::~LevelManager() {
 reward_type LevelManager::get_random_reward() {
     float roll = rnd();
     if (roll < 0.33) return HEAL;
-    else if (roll < 0.66) return DAMAGE;
-    else return SPEED;
+    else if (roll < 0.66) return ARES;
+    else return ZEUS;
 }
 
 void LevelManager::generate_graph() {
@@ -26,20 +26,50 @@ void LevelManager::generate_graph() {
     all_nodes.clear();
     active_doors.clear();
 
-    root_node = new RoomNode(3, HEAL);
-    RoomNode* path_a = new RoomNode(3 + rnd(3), get_random_reward());
-    RoomNode* path_b = new RoomNode(3 + rnd(3), get_random_reward());
-    RoomNode* boss = new RoomNode(1, BOSS);
+    int run_depth = 6;
+
+    root_node = new RoomNode(0, HEAL);
 
     all_nodes.add(root_node);
-    all_nodes.add(path_a);
-    all_nodes.add(path_b);
+    dynamic_array<RoomNode*> previous_layer;
+    previous_layer.add(root_node);
+
+    for (int depth = 1; depth < run_depth; ++depth) {
+        dynamic_array<RoomNode *> current_layer;
+        reward_type reward_1 = get_random_reward();
+        reward_type reward_2 = get_random_reward();
+
+        while (reward_1 == reward_2) {
+            reward_2 = get_random_reward();
+        }
+
+        RoomNode* room_1 = new RoomNode(3 + depth, reward_1);
+        RoomNode* room_2 = new RoomNode(3 + depth, reward_2);
+        
+        all_nodes.add(room_1);
+        all_nodes.add(room_2);
+        current_layer.add(room_1);
+        current_layer.add(room_2);
+        
+        // Connect the graph
+        for (int i = 0; i < previous_layer.length(); i++) {
+            previous_layer[i]->add_door(room_1);
+            previous_layer[i]->add_door(room_2);
+        }
+
+        previous_layer.clear();
+        for (int i = 0; i < current_layer.length(); i++) {
+            previous_layer.add(current_layer[i]);
+        }
+        
+    }
+    
+    RoomNode *boss = new RoomNode(1, BOSS);
     all_nodes.add(boss);
 
-    root_node->add_door(path_a);
-    root_node->add_door(path_b);
-    path_a->add_door(boss);
-    path_b->add_door(boss);
+    for (int i = 0; i < previous_layer.length(); i++) {
+        previous_layer[i]->add_door(boss);
+    }
 
     current_room = root_node;
 }
@@ -50,7 +80,7 @@ void LevelManager::spawn_wave(dynamic_array<Enemy*> &enemy_arr, int screen_w, in
         return; 
     }
 
-    int num_enemies = current_room->get_enemies() + 2;
+    int num_enemies = current_room->get_enemies();
 
     for (int i = 0; i < num_enemies; i++) {
         point_2d spawn{};
@@ -83,7 +113,8 @@ void LevelManager::generate_doors(int screen_w, int screen_h) {
 
     for (int i = 0; i < next_nodes.length(); i++) {
         PhysicalDoor new_door;
-        new_door.bounds = rectangle_from(screen_w - 80, start_y + (i * (door_h + spacing)), door_w, door_h);
+        // Tweak door spawn here
+        new_door.bounds = rectangle_from(screen_w - 180, start_y + (i * (door_h + spacing)), door_w, door_h);
         new_door.destination = next_nodes[i];
         active_doors.add(new_door);
     }
